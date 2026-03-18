@@ -1,8 +1,6 @@
-import React from 'react';
-import NowPlaying from './NowPlaying';
-import DesktopIcons from './DesktopIcons';
-
-import pfp from '../assets/images/about-me/pfp.jpg';
+import NowPlaying from "./NowPlaying";
+import DesktopIcons from "./DesktopIcons";
+import pfp from "../assets/images/about-me/pfp.jpg";
 
 function Hero() {
   return (
@@ -10,19 +8,26 @@ function Hero() {
       <div className="hero-left-side">
         <div className="pink-sticky hero-sticky">
           <div className="hero-pfp-row">
-            <img
-              src={pfp.src}
-              alt="Profile"
-              className="hero-pfp"
-            />
+            <img src={pfp} alt="Profile" className="hero-pfp" />
           </div>
           <div className="hero-sticky-text">
-            <div>Siddharth<br /><br />Loves NixOS and Gentoo, and I enjoy declarative, functional programming using Nix</div>
+            <div>
+              Siddharth
+              <br />
+              <br />
+              Loves NixOS and Gentoo, and I enjoy declarative, functional
+              programming using Nix
+            </div>
           </div>
         </div>
 
         <div className="github-card">
-          <a href="https://github.com/mooofin" target="_blank" rel="noopener noreferrer" className="github-link">
+          <a
+            href="https://github.com/mooofin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="github-link"
+          >
             <img src="/stuff/234.png" alt="GitHub" />
             <span>GitHub</span>
           </a>

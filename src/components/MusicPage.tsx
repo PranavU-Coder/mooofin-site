@@ -1,59 +1,93 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { LASTFM_CONFIG } from '../config';
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { LASTFM_CONFIG } from "../config";
 
-// Memoized album card component
-const AlbumCard = memo(({ album, index, hoveredAlbum, setHoveredAlbum }) => (
-  <a
-    href={album.url}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="album-card"
-    onMouseEnter={() => setHoveredAlbum(index)}
-    onMouseLeave={() => setHoveredAlbum(null)}
-    style={{
-      animationDelay: `${index * 0.1}s`
-    }}
-  >
-    <div className="album-rank">{index + 1}</div>
-    <div className="album-glow" style={{
-      opacity: hoveredAlbum === index ? 1 : 0
-    }}></div>
-    <div className="album-image">
-      <img
-        src={album.image[3]['#text'] || album.image[2]['#text']}
-        alt={`${album.artist.name} - ${album.name}`}
-        loading="lazy"
-      />
-      <div className="album-overlay">
-        <span className="play-icon">▶</span>
-      </div>
-    </div>
-    <div className="album-info">
-      <div className="album-name">{album.name}</div>
-      <div className="album-artist">{album.artist.name}</div>
-      <div className="album-playcount">
-        {album.playcount} plays
-      </div>
-    </div>
-  </a>
-));
-AlbumCard.displayName = 'AlbumCard';
+interface LastFmImage {
+  "#text": string;
+  size: string;
+}
 
-// Memoized track item component
-const TrackItem = memo(({ track, index }) => {
-  const isNowPlaying = track['@attr'] && track['@attr'].nowplaying === 'true';
+interface Album {
+  name: string;
+  url: string;
+  playcount: string;
+  artist: { name: string };
+  image: LastFmImage[];
+}
+
+interface RecentTrack {
+  name: string;
+  url: string;
+  image: LastFmImage[];
+  artist: { "#text": string };
+  "@attr"?: { nowplaying: string };
+}
+
+interface UserStats {
+  playcount: string;
+  artist_count: string;
+  album_count: string;
+}
+
+interface AlbumCardProps {
+  album: Album;
+  index: number;
+  hoveredAlbum: number | null;
+  setHoveredAlbum: (index: number | null) => void;
+}
+
+interface TrackItemProps {
+  track: RecentTrack;
+  index: number;
+}
+
+const AlbumCard = memo(
+  ({ album, index, hoveredAlbum, setHoveredAlbum }: AlbumCardProps) => (
+    <a
+      href={album.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="album-card"
+      onMouseEnter={() => setHoveredAlbum(index)}
+      onMouseLeave={() => setHoveredAlbum(null)}
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
+      <div className="album-rank">{index + 1}</div>
+      <div
+        className="album-glow"
+        style={{ opacity: hoveredAlbum === index ? 1 : 0 }}
+      ></div>
+      <div className="album-image">
+        <img
+          src={album.image[3]["#text"] || album.image[2]["#text"]}
+          alt={`${album.artist.name} - ${album.name}`}
+          loading="lazy"
+        />
+        <div className="album-overlay">
+          <span className="play-icon">▶</span>
+        </div>
+      </div>
+      <div className="album-info">
+        <div className="album-name">{album.name}</div>
+        <div className="album-artist">{album.artist.name}</div>
+        <div className="album-playcount">{album.playcount} plays</div>
+      </div>
+    </a>
+  ),
+);
+AlbumCard.displayName = "AlbumCard";
+
+const TrackItem = memo(({ track, index }: TrackItemProps) => {
+  const isNowPlaying = Boolean(track["@attr"]?.nowplaying === "true");
 
   return (
     <div
-      className={`track-item ${isNowPlaying ? 'now-playing' : ''}`}
-      style={{
-        animationDelay: `${index * 0.05}s`
-      }}
+      className={`track-item ${isNowPlaying ? "now-playing" : ""}`}
+      style={{ animationDelay: `${index * 0.05}s` }}
     >
       <div className="track-image">
         <img
-          src={track.image[1]['#text']}
-          alt={`${track.artist['#text']} - ${track.name}`}
+          src={track.image[1]["#text"]}
+          alt={`${track.artist["#text"]} - ${track.name}`}
           loading="lazy"
         />
         {isNowPlaying && (
@@ -66,7 +100,7 @@ const TrackItem = memo(({ track, index }) => {
       </div>
       <div className="track-info">
         <div className="track-name">{track.name}</div>
-        <div className="track-artist">{track.artist['#text']}</div>
+        <div className="track-artist">{track.artist["#text"]}</div>
       </div>
       {isNowPlaying && (
         <div className="status-badge">
@@ -77,18 +111,18 @@ const TrackItem = memo(({ track, index }) => {
     </div>
   );
 });
-TrackItem.displayName = 'TrackItem';
+TrackItem.displayName = "TrackItem";
 
 function MusicPage() {
-  const [topAlbums, setTopAlbums] = useState([]);
-  const [recentTracks, setRecentTracks] = useState([]);
+  const [topAlbums, setTopAlbums] = useState<Album[]>([]);
+  const [recentTracks, setRecentTracks] = useState<RecentTrack[]>([]);
   const [loadingAlbums, setLoadingAlbums] = useState(true);
   const [loadingTracks, setLoadingTracks] = useState(true);
-  const [hoveredAlbum, setHoveredAlbum] = useState(null);
-  const [timePeriod, setTimePeriod] = useState('overall');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid');
-  const [stats, setStats] = useState(null);
+  const [hoveredAlbum, setHoveredAlbum] = useState<number | null>(null);
+  const [timePeriod, setTimePeriod] = useState("overall");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
+  const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
     const fetchTopAlbums = async () => {
@@ -96,15 +130,14 @@ function MusicPage() {
       try {
         const { username, apiKey } = LASTFM_CONFIG;
         const response = await fetch(
-          `https://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&api_key=${apiKey}&format=json&limit=12&period=${timePeriod}`
+          `https://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=${username}&api_key=${apiKey}&format=json&limit=12&period=${timePeriod}`,
         );
         const data = await response.json();
-
         if (data.topalbums && data.topalbums.album) {
-          setTopAlbums(data.topalbums.album);
+          setTopAlbums(data.topalbums.album as Album[]);
         }
       } catch (err) {
-        console.error('Error fetching top albums:', err);
+        console.error("Error fetching top albums:", err);
       } finally {
         setLoadingAlbums(false);
       }
@@ -114,15 +147,14 @@ function MusicPage() {
       try {
         const { username, apiKey } = LASTFM_CONFIG;
         const response = await fetch(
-          `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${apiKey}&format=json&limit=10`
+          `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${apiKey}&format=json&limit=10`,
         );
         const data = await response.json();
-
         if (data.recenttracks && data.recenttracks.track) {
-          setRecentTracks(data.recenttracks.track);
+          setRecentTracks(data.recenttracks.track as RecentTrack[]);
         }
       } catch (err) {
-        console.error('Error fetching recent tracks:', err);
+        console.error("Error fetching recent tracks:", err);
       } finally {
         setLoadingTracks(false);
       }
@@ -132,14 +164,14 @@ function MusicPage() {
       try {
         const { username, apiKey } = LASTFM_CONFIG;
         const response = await fetch(
-          `https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${username}&api_key=${apiKey}&format=json`
+          `https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${username}&api_key=${apiKey}&format=json`,
         );
         const data = await response.json();
         if (data.user) {
-          setStats(data.user);
+          setStats(data.user as UserStats);
         }
       } catch (err) {
-        console.error('Error fetching user stats:', err);
+        console.error("Error fetching user stats:", err);
       }
     };
 
@@ -148,48 +180,50 @@ function MusicPage() {
     fetchUserStats();
   }, [timePeriod]);
 
-  // Memoize filtered albums to prevent recalculation on every render
-  const filteredAlbums = useMemo(() =>
-    topAlbums.filter(album =>
-      album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      album.artist.name.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [topAlbums, searchQuery]
+  const filteredAlbums = useMemo(
+    () =>
+      topAlbums.filter(
+        (album) =>
+          album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          album.artist.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [topAlbums, searchQuery],
   );
 
-  // Memoize total plays calculation
-  const totalPlays = useMemo(() =>
-    topAlbums.reduce((sum, album) => sum + parseInt(album.playcount), 0),
-    [topAlbums]
+  const totalPlays = useMemo(
+    () => topAlbums.reduce((sum, album) => sum + parseInt(album.playcount), 0),
+    [topAlbums],
   );
 
-  // Memoize callbacks
-  const handleSearchChange = useCallback((e) => {
-    setSearchQuery(e.target.value);
-  }, []);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+    },
+    [],
+  );
 
-  const handleTimePeriodChange = useCallback((period) => {
+  const handleTimePeriodChange = useCallback((period: string) => {
     setTimePeriod(period);
   }, []);
 
-  const handleViewModeChange = useCallback((mode) => {
+  const handleViewModeChange = useCallback((mode: string) => {
     setViewMode(mode);
   }, []);
 
   return (
     <main className="music-page">
       <div className="music-hero-image">
-        <img
-          src="/images/music-page.gif"
-          alt="Music vibes"
-          loading="eager"
-        />
+        <img src="/images/music-page.gif" alt="Music vibes" loading="eager" />
         <div className="hero-overlay"></div>
       </div>
 
       <div className="music-page-header">
-        <a href="/" className="back-link">Back to Home</a>
-        <h1 className="glitch-title" data-text="Music Space">Music Space</h1>
+        <a href="/" className="back-link">
+          Back to Home
+        </a>
+        <h1 className="glitch-title" data-text="Music Space">
+          Music Space
+        </h1>
         <div className="music-visualizer">
           <span className="bar"></span>
           <span className="bar"></span>
@@ -203,7 +237,9 @@ function MusicPage() {
         {stats && (
           <section className="stats-section">
             <div className="stat-card">
-              <div className="stat-value">{parseInt(stats.playcount).toLocaleString()}</div>
+              <div className="stat-value">
+                {parseInt(stats.playcount).toLocaleString()}
+              </div>
               <div className="stat-label">Total Scrobbles</div>
             </div>
             <div className="stat-card">
@@ -211,11 +247,15 @@ function MusicPage() {
               <div className="stat-label">Top 12 Plays</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{parseInt(stats.artist_count).toLocaleString()}</div>
+              <div className="stat-value">
+                {parseInt(stats.artist_count).toLocaleString()}
+              </div>
               <div className="stat-label">Artists</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{parseInt(stats.album_count).toLocaleString()}</div>
+              <div className="stat-value">
+                {parseInt(stats.album_count).toLocaleString()}
+              </div>
               <div className="stat-label">Albums</div>
             </div>
           </section>
@@ -239,41 +279,41 @@ function MusicPage() {
               </div>
               <div className="time-period-selector">
                 <button
-                  className={timePeriod === '7day' ? 'active' : ''}
-                  onClick={() => handleTimePeriodChange('7day')}
+                  className={timePeriod === "7day" ? "active" : ""}
+                  onClick={() => handleTimePeriodChange("7day")}
                 >
                   Week
                 </button>
                 <button
-                  className={timePeriod === '1month' ? 'active' : ''}
-                  onClick={() => handleTimePeriodChange('1month')}
+                  className={timePeriod === "1month" ? "active" : ""}
+                  onClick={() => handleTimePeriodChange("1month")}
                 >
                   Month
                 </button>
                 <button
-                  className={timePeriod === '3month' ? 'active' : ''}
-                  onClick={() => handleTimePeriodChange('3month')}
+                  className={timePeriod === "3month" ? "active" : ""}
+                  onClick={() => handleTimePeriodChange("3month")}
                 >
                   3 Months
                 </button>
                 <button
-                  className={timePeriod === 'overall' ? 'active' : ''}
-                  onClick={() => handleTimePeriodChange('overall')}
+                  className={timePeriod === "overall" ? "active" : ""}
+                  onClick={() => handleTimePeriodChange("overall")}
                 >
                   All Time
                 </button>
               </div>
               <div className="view-toggle">
                 <button
-                  className={viewMode === 'grid' ? 'active' : ''}
-                  onClick={() => handleViewModeChange('grid')}
+                  className={viewMode === "grid" ? "active" : ""}
+                  onClick={() => handleViewModeChange("grid")}
                   title="Grid View"
                 >
                   ⊞
                 </button>
                 <button
-                  className={viewMode === 'list' ? 'active' : ''}
-                  onClick={() => handleViewModeChange('list')}
+                  className={viewMode === "list" ? "active" : ""}
+                  onClick={() => handleViewModeChange("list")}
                   title="List View"
                 >
                   ☰
@@ -288,7 +328,9 @@ function MusicPage() {
               <p>Loading albums...</p>
             </div>
           ) : (
-            <div className={viewMode === 'grid' ? 'albums-grid' : 'albums-list'}>
+            <div
+              className={viewMode === "grid" ? "albums-grid" : "albums-list"}
+            >
               {filteredAlbums.map((album, index) => (
                 <AlbumCard
                   key={`${album.name}-${index}`}

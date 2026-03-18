@@ -1,6 +1,5 @@
 // src/components/Blog.jsx
-import ReactMarkdown from 'react-markdown';
-
+import ReactMarkdown from "react-markdown";
 
 function Blog() {
   return (

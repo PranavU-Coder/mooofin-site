@@ -1,7 +1,9 @@
-import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
+import { useEffect, useRef } from "react";
 
-import './Iridescence.css';
+import "./Iridescence.css";
+
+// lowk vro just learn an animation lib at this point :< this graphics aah WebGPU typestuff is cool but impossible to understand
 
 const vertexShader = `
 attribute vec2 uv;
@@ -46,8 +48,24 @@ void main() {
 }
 `;
 
-export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude = 0.1, mouseReact = true, ...rest }) {
-  const ctnDom = useRef(null);
+interface IridescenceProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "color"
+> {
+  color?: [number, number, number];
+  speed?: number;
+  amplitude?: number;
+  mouseReact?: boolean;
+}
+
+export default function Iridescence({
+  color = [1, 1, 1],
+  speed = 1.0,
+  amplitude = 0.1,
+  mouseReact = true,
+  ...rest
+}: IridescenceProps) {
+  const ctnDom = useRef<HTMLDivElement>(null);
   const mousePos = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
@@ -57,7 +75,7 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
     const gl = renderer.gl;
     gl.clearColor(1, 1, 1, 1);
 
-    let program;
+    let program: InstanceType<typeof Program>;
 
     function resize() {
       const scale = 1;
@@ -66,11 +84,11 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
         program.uniforms.uResolution.value = new Color(
           gl.canvas.width,
           gl.canvas.height,
-          gl.canvas.width / gl.canvas.height
+          gl.canvas.width / gl.canvas.height,
         );
       }
     }
-    window.addEventListener('resize', resize, false);
+    window.addEventListener("resize", resize, false);
     resize();
 
     const geometry = new Triangle(gl);
@@ -81,18 +99,24 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
         uTime: { value: 0 },
         uColor: { value: new Color(...color) },
         uResolution: {
-          value: new Color(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height)
+          value: new Color(
+            gl.canvas.width,
+            gl.canvas.height,
+            gl.canvas.width / gl.canvas.height,
+          ),
         },
-        uMouse: { value: new Float32Array([mousePos.current.x, mousePos.current.y]) },
+        uMouse: {
+          value: new Float32Array([mousePos.current.x, mousePos.current.y]),
+        },
         uAmplitude: { value: amplitude },
-        uSpeed: { value: speed }
-      }
+        uSpeed: { value: speed },
+      },
     });
 
     const mesh = new Mesh(gl, { geometry, program });
-    let animateId;
+    let animateId: number;
 
-    function update(t) {
+    function update(t: number) {
       animateId = requestAnimationFrame(update);
       program.uniforms.uTime.value = t * 0.001;
       renderer.render({ scene: mesh });
@@ -100,7 +124,7 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
     animateId = requestAnimationFrame(update);
     ctn.appendChild(gl.canvas);
 
-    function handleMouseMove(e) {
+    function handleMouseMove(e: MouseEvent) {
       const rect = ctn.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
@@ -109,17 +133,17 @@ export default function Iridescence({ color = [1, 1, 1], speed = 1.0, amplitude 
       program.uniforms.uMouse.value[1] = y;
     }
     if (mouseReact) {
-      ctn.addEventListener('mousemove', handleMouseMove);
+      ctn.addEventListener("mousemove", handleMouseMove);
     }
 
     return () => {
       cancelAnimationFrame(animateId);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener("resize", resize);
       if (mouseReact) {
-        ctn.removeEventListener('mousemove', handleMouseMove);
+        ctn.removeEventListener("mousemove", handleMouseMove);
       }
       ctn.removeChild(gl.canvas);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, [color, speed, amplitude, mouseReact]);
 

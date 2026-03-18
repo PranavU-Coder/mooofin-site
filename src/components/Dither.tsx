@@ -6,6 +6,8 @@ import * as THREE from "three";
 
 import "./Dither.css";
 
+// I am not sure I understood what is this
+
 const waveVertexShader = `
 precision highp float;
 varying vec2 vUv;
@@ -133,35 +135,70 @@ void mainImage(in vec4 inputColor, in vec2 uv, out vec4 outputColor) {
 }
 `;
 
+type RetroEffectUniforms = Map<string, THREE.Uniform<number>>;
+
+interface RetroEffectProps {
+  colorNum?: number;
+  pixelSize?: number;
+}
+
+interface DitheredWavesProps {
+  waveSpeed: number;
+  waveFrequency: number;
+  waveAmplitude: number;
+  waveColor: [number, number, number];
+  colorNum: number;
+  pixelSize: number;
+  disableAnimation: boolean;
+  enableMouseInteraction: boolean;
+  mouseRadius: number;
+}
+
+interface DitherProps {
+  waveSpeed?: number;
+  waveFrequency?: number;
+  waveAmplitude?: number;
+  waveColor?: [number, number, number];
+  colorNum?: number;
+  pixelSize?: number;
+  disableAnimation?: boolean;
+  enableMouseInteraction?: boolean;
+  mouseRadius?: number;
+}
+
 class RetroEffectImpl extends Effect {
+  declare uniforms: RetroEffectUniforms;
+
   constructor() {
-    const uniforms = new Map([
+    const uniforms: RetroEffectUniforms = new Map([
       ["colorNum", new THREE.Uniform(4.0)],
       ["pixelSize", new THREE.Uniform(2.0)],
     ]);
     super("RetroEffect", ditherFragmentShader, { uniforms });
     this.uniforms = uniforms;
   }
-  set colorNum(v) {
-    this.uniforms.get("colorNum").value = v;
+  set colorNum(v: number) {
+    this.uniforms.get("colorNum")!.value = v;
   }
-  get colorNum() {
-    return this.uniforms.get("colorNum").value;
+  get colorNum(): number {
+    return this.uniforms.get("colorNum")!.value;
   }
-  set pixelSize(v) {
-    this.uniforms.get("pixelSize").value = v;
+  set pixelSize(v: number) {
+    this.uniforms.get("pixelSize")!.value = v;
   }
-  get pixelSize() {
-    return this.uniforms.get("pixelSize").value;
+  get pixelSize(): number {
+    return this.uniforms.get("pixelSize")!.value;
   }
 }
 
 const WrappedRetro = wrapEffect(RetroEffectImpl);
 
-const RetroEffect = forwardRef((props, ref) => {
-  const { colorNum, pixelSize } = props;
-  return <WrappedRetro ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
-});
+const RetroEffect = forwardRef<RetroEffectImpl, RetroEffectProps>(
+  (props, ref) => {
+    const { colorNum, pixelSize } = props;
+    return <WrappedRetro ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
+  },
+);
 RetroEffect.displayName = "RetroEffect";
 
 function DitheredWaves({
@@ -174,8 +211,8 @@ function DitheredWaves({
   disableAnimation,
   enableMouseInteraction,
   mouseRadius,
-}) {
-  const mesh = useRef(null);
+}: DitheredWavesProps) {
+  const mesh = useRef<THREE.Mesh>(null);
   const mouseRef = useRef(new THREE.Vector2());
   const { viewport, size, gl } = useThree();
 
@@ -193,15 +230,16 @@ function DitheredWaves({
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
-    const w = Math.floor(size.width * dpr),
-      h = Math.floor(size.height * dpr);
+    const w = Math.floor(size.width * dpr);
+    const h = Math.floor(size.height * dpr);
     const res = waveUniformsRef.current.resolution.value;
     if (res.x !== w || res.y !== h) {
       res.set(w, h);
     }
   }, [size, gl]);
 
-  const prevColor = useRef([...waveColor]);
+  const prevColor = useRef<[number, number, number]>([...waveColor]);
+
   useFrame(({ clock }) => {
     const u = waveUniformsRef.current;
 
@@ -228,13 +266,13 @@ function DitheredWaves({
     }
   });
 
-  const handlePointerMove = (e) => {
+  const handlePointerMove = (e: { clientX: number; clientY: number }) => {
     if (!enableMouseInteraction) return;
     const rect = gl.domElement.getBoundingClientRect();
     const dpr = gl.getPixelRatio();
     mouseRef.current.set(
       (e.clientX - rect.left) * dpr,
-      (e.clientY - rect.top) * dpr
+      (e.clientY - rect.top) * dpr,
     );
   };
 
@@ -276,7 +314,7 @@ export default function Dither({
   disableAnimation = false,
   enableMouseInteraction = true,
   mouseRadius = 1,
-}) {
+}: DitherProps) {
   return (
     <Canvas
       className="dither-container"
