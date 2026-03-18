@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,15 +9,15 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ['/pagefind/pagefind.js'],
+      external: ["/pagefind/pagefind.js"],
       output: {
         manualChunks: undefined,
       },
     },
   },
   define: {
-    __VITE_DEV_SERVER_URL__: JSON.stringify(''),
+    __VITE_DEV_SERVER_URL__: JSON.stringify(""),
   },
   clearScreen: false,
-})
+});
 //

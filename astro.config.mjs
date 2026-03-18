@@ -1,17 +1,17 @@
-import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
+import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://mooofin.vercel.app',
-    integrations: [react(), sitemap()],
-    output: 'static',
-    vite: {
-        build: {
-            rollupOptions: {
-                external: ['/pagefind/pagefind.js'],
-            },
-        },
+  site: "https://mooofin.vercel.app",
+  integrations: [react(), sitemap()],
+  output: "static",
+  vite: {
+    build: {
+      rollupOptions: {
+        external: ["/pagefind/pagefind.js"],
+      },
     },
+  },
 });
