@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function Header() {
   const [isVisible, setIsVisible] = useState(false);
@@ -6,7 +6,9 @@ function Header() {
   useEffect(() => {
     document.body.classList.add("theme-image");
     try {
-      localStorage.setItem("theme-image", "1");
+      if (localStorage.getItem("theme-image") === null) {
+        localStorage.setItem("theme-image", "1");
+      }
     } catch (e) {
       console.error(e);
     }
@@ -24,12 +26,6 @@ function Header() {
     };
   }, []);
 
-  const scrollToId = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault();
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
     <header
       className={`header ${isVisible ? "header-visible" : "header-hidden"}`}
@@ -43,14 +39,10 @@ function Header() {
             <a href="/">Home</a>
           </li>
           <li>
-            <a href="#about" onClick={(e) => scrollToId(e, "about")}>
-              About
-            </a>
+            <a href="/about">About</a>
           </li>
           <li>
-            <a href="#contact" onClick={(e) => scrollToId(e, "contact")}>
-              Contact
-            </a>
+            <a href="/contact">Contact</a>
           </li>
           <li>
             <a href="/blog">Blog</a>
