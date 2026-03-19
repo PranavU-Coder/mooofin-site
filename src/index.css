@@ -1,5 +1,29 @@
-/* src/index.css */
+@import "tailwindcss/utilities" layer(utilities);
 @import "./performance-optimizations.css";
+
+/* yea this is the last time Im attempting to do smthg like this */
+
+ol[data-slot="breadcrumb-list"] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+[data-slot="breadcrumb-link"] {
+  color: #ff69b4;
+}
+
+[data-slot="breadcrumb-page"] {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-slot="breadcrumb-separator"] {
+  color: #ff69b4;
+}
 
 :root {
   --background-color: #1a1a1a;

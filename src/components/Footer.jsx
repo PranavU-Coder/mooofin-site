@@ -1,4 +1,5 @@
 function Footer() {
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="footer">
       <div className="social-links">
@@ -17,7 +18,7 @@ function Footer() {
           Spotify
         </a>
       </div>
-      <p>&copy; 2025 mooofin. All Rights Reserved.</p>
+      <p>© {currentYear} mooofin. All Rights Reserved.</p>
     </footer>
   );
 }

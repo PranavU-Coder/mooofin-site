@@ -1,19 +1,15 @@
-// src/App.jsx
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Critical components - load immediately
-import Header from "./components/Header.jsx";
-import Hero from "./components/Hero.jsx";
-import Contact from "./components/Contact.jsx";
-import VideoBackground from "./components/VideoBackground.jsx";
-import PinkCursor from "./components/PinkCursor.jsx";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import Contact from "./components/Contact";
+import VideoBackground from "./components/VideoBackground";
+import PinkCursor from "./components/PinkCursor";
 
 // Lazy load non-critical components
-const BlogPage = lazy(() => import("./components/BlogPage.js"));
-const BlogPost = lazy(() => import("./components/BlogPost.jsx"));
-const AboutPage = lazy(() => import("./components/AboutPage.js"));
-const MusicPage = lazy(() => import("./components/MusicPage.jsx"));
+const MusicPage = lazy(() => import("./components/MusicPage"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -40,7 +36,6 @@ function AppContent() {
         <main>
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              {/* Route for your homepage */}
               <Route
                 path="/"
                 element={
@@ -52,14 +47,7 @@ function AppContent() {
                   </>
                 }
               />
-              {/* Route for the about page */}
-              <Route path="/about" element={<AboutPage />} />
-              {/* Route for the music page */}
               <Route path="/music" element={<MusicPage />} />
-              {/* Route for the blog list page */}
-              <Route path="/blog" element={<BlogPage />} />
-              {/* Route for a single, dynamic blog post. This is crucial. */}
-              <Route path="/blog/:slug" element={<BlogPost />} />
             </Routes>
           </Suspense>
         </main>

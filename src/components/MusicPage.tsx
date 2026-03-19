@@ -218,9 +218,6 @@ function MusicPage() {
       </div>
 
       <div className="music-page-header">
-        <a href="/" className="back-link">
-          Back to Home
-        </a>
         <h1 className="glitch-title" data-text="Music Space">
           Music Space
         </h1>

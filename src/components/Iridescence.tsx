@@ -3,8 +3,6 @@ import { useEffect, useRef } from "react";
 
 import "./Iridescence.css";
 
-// lowk vro just learn an animation lib at this point :< this graphics aah WebGPU typestuff is cool but impossible to understand
-
 const vertexShader = `
 attribute vec2 uv;
 attribute vec2 position;

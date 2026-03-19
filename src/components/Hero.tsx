@@ -1,6 +1,5 @@
 import NowPlaying from "./NowPlaying";
 import DesktopIcons from "./DesktopIcons";
-import pfp from "../assets/images/about-me/pfp.jpg";
 
 function Hero() {
   return (
@@ -8,7 +7,7 @@ function Hero() {
       <div className="hero-left-side">
         <div className="pink-sticky hero-sticky">
           <div className="hero-pfp-row">
-            <img src={pfp} alt="Profile" className="hero-pfp" />
+            <img src="/images/pfp.jpg" alt="Profile" className="hero-pfp" />
           </div>
           <div className="hero-sticky-text">
             <div>

@@ -36,8 +36,10 @@ export default function BlogSearch({ posts }: { posts: Post[] }) {
     const search = async () => {
       if (!pagefindRef.current) {
         try {
-          pagefindRef.current =
-            (await import("/pagefind/pagefind.js")) as Pagefind;
+          const pagefindUrl = "/pagefind/pagefind.js";
+          pagefindRef.current = (await import(
+            /* @vite-ignore */ pagefindUrl
+          )) as Pagefind;
           await pagefindRef.current.init();
         } catch {
           pagefindRef.current = null;
