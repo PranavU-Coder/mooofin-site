@@ -20,7 +20,8 @@ export default function GlowCard({
   borderRadius = "0.75rem",
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  // we keep 'hovered' as state since it only fires once per enter/leave, 
+  // but we remove 'pos' state to avoid high-frequency re-renders.
   const [hovered, setHovered] = useState(false);
 
   const hex2rgb = (hex: string) => {
@@ -34,7 +35,12 @@ export default function GlowCard({
   const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // directly update CSS variables on the DOM node
+    cardRef.current.style.setProperty('--mouse-x', `${x}px`);
+    cardRef.current.style.setProperty('--mouse-y', `${y}px`);
   }, []);
 
   return (
@@ -69,7 +75,7 @@ export default function GlowCard({
           opacity: hovered ? 1 : 0,
           transition: "opacity 0.3s ease",
           background: `radial-gradient(
-            350px circle at ${pos.x}px ${pos.y}px,
+            350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
             rgba(${rgb}, ${glowOpacity}),
             transparent 60%
           )`,
