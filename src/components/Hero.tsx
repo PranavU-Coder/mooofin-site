@@ -10,7 +10,6 @@ function Hero() {
         <GlowCard
           glowColor="#a855f7"
           glowOpacity={0.3}
-          borderRadius="0.75rem"
           className="pink-sticky hero-sticky"
         >
           <div

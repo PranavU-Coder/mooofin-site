@@ -4,11 +4,6 @@ import { useRef, useState, useCallback } from "react";
 
 interface GlowCardProps {
   children: React.ReactNode;
-  /**
-   * Glow color. Should CONTRAST the card background.
-   * Pink card → use purple "#a855f7"
-   * Dark card → use pink "#ff69b4"
-   */
   glowColor?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -51,9 +46,7 @@ export default function GlowCard({
         position: "relative",
         borderRadius,
         overflow: "hidden",
-        // Strong glowing border — visible even at rest on dark bg
         border: `1.5px solid rgba(${rgb}, ${hovered ? 0.85 : 0.45})`,
-        // Outer box-shadow glow (visible OUTSIDE the card on the dark page bg)
         boxShadow: hovered
           ? `0 0 0 1px rgba(${rgb}, 0.3),
              0 0 16px 4px rgba(${rgb}, 0.55),
@@ -66,7 +59,6 @@ export default function GlowCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Cursor-following spotlight — contrasting colour punches through solid bg */}
       <div
         aria-hidden
         style={{
@@ -83,7 +75,6 @@ export default function GlowCard({
           )`,
         }}
       />
-      {/* Content */}
       <div style={{ position: "relative", zIndex: 10 }}>{children}</div>
     </div>
   );
