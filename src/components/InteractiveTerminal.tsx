@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, CSSProperties } from "react";
+import { useRef, useState, useEffect, CSSProperties } from "react";
 import { CakeSlice } from "lucide-react";
 
 interface ThemeStyles {
@@ -88,6 +88,19 @@ export function InteractiveTerminal({
   const [showFinal, setShowFinal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+  const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [inputFocused, setInputFocused] = useState(false);
+
+  useEffect(() => {
+    return () => { timerIdsRef.current.forEach(clearTimeout); };
+  }, []);
+
+  // setTimeout wrapper that registers the ID for cleanup
+  const trackedDelay = (ms: number) =>
+    new Promise<void>((r) => {
+      const id = setTimeout(r, ms);
+      timerIdsRef.current.push(id);
+    });
 
   const reset = () => {
     setInputValue("");
@@ -102,14 +115,17 @@ export function InteractiveTerminal({
     setVisibleSteps([]);
     setShowFinal(false);
     for (let i = 0; i < steps.length; i++) {
-      await new Promise((r) => setTimeout(r, stepDelay));
+      await trackedDelay(stepDelay);
       setVisibleSteps((prev) => [...prev, steps[i]]);
       if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
-    await new Promise((r) => setTimeout(r, stepDelay));
+    await trackedDelay(stepDelay);
     setShowFinal(true);
     setPhase("done");
-    if (repeat) setTimeout(() => { reset(); }, repeatDelay);
+    if (repeat) {
+      const id = setTimeout(() => { reset(); }, repeatDelay);
+      timerIdsRef.current.push(id);
+    }
   };
 
   const handleRun = () => {
@@ -226,10 +242,13 @@ export function InteractiveTerminal({
             background: "transparent",
             border: "none",
             outline: "none",
+            boxShadow: inputFocused ? `0 1px 0 0 ${theme.accentColor}` : "none",
             ...out,
             fontSize: 14,
             opacity: phase === "running" ? 0.5 : 1,
           }}
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
           autoComplete="off"
           spellCheck={false}
         />
